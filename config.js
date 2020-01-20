@@ -6,8 +6,8 @@ const config = {
   },
   production: {
     debug: false,
-    scriptUrl: 'https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-tracker@latest/dist/mkz.js',
-    appId: 'markeaze-dev'
+    scriptUrl: 'https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-tracker@stable/dist/mkz.js',
+    appId: 'markeaze'
   }
 }
 

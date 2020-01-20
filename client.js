@@ -2,7 +2,7 @@ const config = require('./config')
 
 // Load external script with store
 const loadExternalScript = (ecwidStoreId, callback) => {
-  const script = document.createElement('script')
+  let script = document.createElement('script')
   script.setAttribute('src', config.scriptUrl)
   script.setAttribute('type', 'text/javascript')
   script.charset = 'utf-8'
@@ -13,9 +13,7 @@ const loadExternalScript = (ecwidStoreId, callback) => {
 }
 
 const initMarkeazePixel = () => {
-  const appConfig = JSON.parse(Ecwid.getAppPublicConfig(config.appId))
-
-  console.log(appConfig)
+  let appConfig = JSON.parse(Ecwid.getAppPublicConfig(config.appId))
 
   mkz('appKey', appConfig.app_key)
   if (config.debug) mkz('debug', true)
@@ -23,7 +21,7 @@ const initMarkeazePixel = () => {
 
 const setVisitorInfo = (profile) => {
   if (profile != null) {
-    const visitorInfo = {}
+    let visitorInfo = {}
 
     visitorInfo['email'] = profile.email
     visitorInfo['client_id'] = profile.id
@@ -36,11 +34,11 @@ const setVisitorInfo = (profile) => {
 }
 
 const trackPageView = (page) => {
-  const eventPayload = {}
+  let eventPayload = {}
 
   if (page.type == 'PRODUCT') {
     eventPayload.offer = {
-      variant_id: String(page.productId), // variant_id????????
+      variant_id: String(page.productId),
       name: page.name
     }
   }
@@ -56,7 +54,7 @@ const trackPageView = (page) => {
 }
 
 const trackCartUpdate = (cart) => {
-  const cartItems = []
+  let cartItems = []
   for (i = 0; i < cart.items.length; i++) {
     line_item = cart.items[i]
     if (line_item.product) {
@@ -64,13 +62,28 @@ const trackCartUpdate = (cart) => {
         variant_id:   String(line_item.product.id),
         qnt:          line_item.quantity,
         price:        line_item.product.price,
-        name:         line_item.product.name,
+        name:         getProductName(line_item.product, line_item.options),
         url:          line_item.product.url
       })
     }
   }
 
   mkz('trackCartUpdate', {items: cartItems})
+}
+
+const getProductName = (product, options) => {
+  let productName = product.name
+
+  if (options) {
+    let opts = []
+    for (let [key, value] of Object.entries(options)) {
+      opts.push(key + ": " + value)
+    }
+    
+    productName = productName + ' (' + opts.join(', ') + ')'
+  }
+  
+  return productName
 }
 
 // https://developers.ecwid.com/api-documentation/subscribe-to-events
@@ -88,31 +101,6 @@ const init = () => {
   })
 
   Ecwid.OnCartChanged.add((cart) => {
-    // {
-    //   orderId: 0
-    //   productsQuantity: 5
-    //   cartId: 'E62B0DA2-F73D-4781-9F2D-87E879AD5AAE'
-    //   weight: 1.66
-    //   items: [
-    //     {
-    //       product: {
-    //         price: 3.33
-    //         name: 'Apple222'
-    //         weight: 0.32
-    //         id: 38843905
-    //         shortDescription: 'Apple 222 The apple is the pomaceous fruit of the apple tree, species Malus domestica in the rose family Rosaceae. It ...'
-    //         sku: '00000'
-    //         url: 'http://eqsol.ru/ecwid2.html?~~mode=product&~~id=38843905#!/Apple222/p/38843905/category=10187566'
-    //       },
-    //       quantity: 3,
-    //       options: {
-    //         Color: 'Green'
-    //         Size: 'Big'
-    //       }
-    //     }
-    //   ]
-    // }
-
     trackCartUpdate(cart)
   })
 }
