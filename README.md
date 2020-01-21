@@ -12,12 +12,12 @@ You have nothing to do with it, this script is automatically loaded by Ecwid whe
 
 Production environment:
 ```
-https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-ecwid-client@stable/dist/client.js
+https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-ecwid-client@latest/dist/client.js
 ```
 
-Dev environment (unstable!):
+Dev environment (from branch `dev`, unstable!):
 ```
-https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-ecwid-client@latest/dist/client.js
+https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-ecwid-client@dev/dist/client.js
 ```
 
 ### Builing client for different environments
@@ -33,3 +33,13 @@ $ NODE_ENV=staging npm run build
 ```
 $ NODE_ENV=production npm run build
 ```
+
+### Development workflow
+
+- make changes;
+- run `NODE_ENV=staging npm run build` and commit to `dev` branch;
+- test changes in staging environment;
+- merge branch `dev` into `master`;
+- run `NODE_ENV=production npm run build` and commit to `master` branch;
+- publish a new release;
+- purge CDN cache.
