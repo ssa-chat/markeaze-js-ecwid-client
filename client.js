@@ -53,9 +53,12 @@ const trackPageView = (page) => {
   }
 
   if (page.type == 'CATEGORY') {
-    eventPayload.category = {
-      uid: String(page.categoryId),
-      name: page.name
+    // exclude root category
+    if (page.categoryId != 0) {
+      eventPayload.category = {
+        uid: String(page.categoryId),
+        name: page.name
+      }
     }
   }
 
