@@ -12,6 +12,15 @@ const loadExternalScript = (ecwidStoreId, callback) => {
   document.body.appendChild(script)
 }
 
+const createMarkeazePixel = () => {
+  (function(w,d,c,h) {
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []
+      ).push(arguments)
+    }
+  })(window, document, 'mkz')
+}
+
 const initMarkeazePixel = () => {
   let appConfig = JSON.parse(Ecwid.getAppPublicConfig(config.appId))
 
@@ -88,6 +97,8 @@ const getProductName = (product, options) => {
 
 // https://developers.ecwid.com/api-documentation/subscribe-to-events
 const init = () => {
+  createMarkeazePixel()
+
   Ecwid.OnAPILoaded.add(() => {
     loadExternalScript(Ecwid.getOwnerId(), initMarkeazePixel)
   })
