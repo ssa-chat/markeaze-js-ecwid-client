@@ -66,6 +66,8 @@ const trackPageView = (page) => {
 }
 
 const trackCartUpdate = (cart) => {
+  if (cart == null) return 
+
   let cartItems = []
   for (i = 0; i < cart.items.length; i++) {
     line_item = cart.items[i]
