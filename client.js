@@ -33,7 +33,7 @@ const setVisitorInfo = (profile) => {
     let visitorInfo = {}
 
     visitorInfo['email'] = profile.email
-    visitorInfo['client_id'] = profile.id
+    visitorInfo['client_id'] = String(profile.id)
     if (profile.billingPerson != null) visitorInfo['full_name'] = profile.billingPerson.name
 
     mkz('setVisitorInfo', visitorInfo)
