@@ -100,6 +100,23 @@ const getProductName = (product, options) => {
   return productName
 }
 
+const updateVisitorInfoFromOrder = (order) => {
+  let visitorInfo = {}
+
+  if (typeof order.customer !== 'undefined') {
+    visitorInfo['email'] = order.customer.email
+    visitorInfo['full_name'] = order.customer.name
+  }
+
+  if (typeof order.billingPerson !== 'undefined') {
+    visitorInfo['phone'] = order.billingPerson.phone
+  }
+
+  if (visitorInfo !== {}) {
+    mkz('trackVisitorUpdate', visitorInfo)
+  }
+}
+
 // https://developers.ecwid.com/api-documentation/subscribe-to-events
 const init = () => {
   createMarkeazePixel()
@@ -118,6 +135,10 @@ const init = () => {
 
   Ecwid.OnCartChanged.add((cart) => {
     trackCartUpdate(cart)
+  })
+
+  Ecwid.OnOrderPlaced.add((order) => {
+    updateVisitorInfoFromOrder(order)
   })
 }
 
