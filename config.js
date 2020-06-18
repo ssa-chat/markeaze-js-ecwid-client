@@ -1,7 +1,7 @@
 const config = {
   staging: {
     debug: true,
-    scriptUrl: 'https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-tracker@latest/dist/mkz.js',
+    scriptUrl: 'https://cdn.jsdelivr.net/gh/markeaze/markeaze-js-tracker@dev/dist/mkz.js',
     appId: 'markeaze-dev'
   },
   production: {
