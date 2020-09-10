@@ -65,6 +65,10 @@ const trackPageView = (page) => {
   mkz('trackPageView', eventPayload)
 }
 
+const trackSearch = (page) => {
+  mkz('trackSearch', {term: page.keywords})
+}
+
 const trackCartUpdate = (cart) => {
   if (cart == null) return 
 
@@ -130,7 +134,16 @@ const init = () => {
   })
 
   Ecwid.OnPageLoaded.add((page) => {
-    trackPageView(page)
+    // When search mode detected - track only `search` event,
+    // without `page_view` events.
+    if (page.type == 'SEARCH') {
+      // Avoid search tracking on seach results navigation
+      if (page.offset == 0) {
+        trackSearch(page)
+      }
+    } else {
+      trackPageView(page)
+    }
   })
 
   Ecwid.OnCartChanged.add((cart) => {
