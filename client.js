@@ -7,7 +7,7 @@ const loadExternalScript = (ecwidStoreId, callback) => {
   script.setAttribute('type', 'text/javascript')
   script.charset = 'utf-8'
   script.async = true
-  
+
   script.onreadystatechange = script.onload = callback
   document.body.appendChild(script)
 }
@@ -66,11 +66,15 @@ const trackPageView = (page) => {
 }
 
 const trackSearch = (page) => {
-  mkz('trackSearch', {term: page.keywords})
+  const count = document.querySelectorAll('.grid-product').length
+  mkz('trackSearch', {
+    term: page.keywords,
+    result: count > 0 ? (count === 1 ? 'normal' : 'too_many') : 'empty'
+  })
 }
 
 const trackCartUpdate = (cart) => {
-  if (cart == null) return 
+  if (cart == null) return
 
   let cartItems = []
   for (i = 0; i < cart.items.length; i++) {
@@ -97,10 +101,10 @@ const getProductName = (product, options) => {
     for (let [key, value] of Object.entries(options)) {
       opts.push(key + ": " + value)
     }
-    
+
     productName = productName + ' (' + opts.join(', ') + ')'
   }
-  
+
   return productName
 }
 
