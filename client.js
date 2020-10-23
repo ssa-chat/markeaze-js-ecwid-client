@@ -7,7 +7,7 @@ const loadExternalScript = (ecwidStoreId, callback) => {
   script.setAttribute('type', 'text/javascript')
   script.charset = 'utf-8'
   script.async = true
-  
+
   script.onreadystatechange = script.onload = callback
   document.body.appendChild(script)
 }
@@ -19,6 +19,20 @@ const createMarkeazePixel = () => {
       ).push(arguments)
     }
   })(window, document, 'mkz')
+}
+
+const createXhrObserver = () => {
+  const oldSend = XMLHttpRequest.prototype.send
+  XMLHttpRequest.prototype.send = function abSend(data) {
+    const oldFn = this.onreadystatechange
+    this.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        document.dispatchEvent(new CustomEvent('ajaxComplete', { detail: { xhr: this, data } }))
+      }
+      if (oldFn) return oldFn.apply(this, arguments)
+    };
+    return oldSend.apply(this, arguments)
+  }
 }
 
 const initMarkeazePixel = () => {
@@ -66,11 +80,15 @@ const trackPageView = (page) => {
 }
 
 const trackSearch = (page) => {
-  mkz('trackSearch', {term: page.keywords})
+  const params = {
+    term: page.keywords
+  }
+  if (page.searchResults) params.result = page.searchResults
+  mkz('trackSearch', params)
 }
 
 const trackCartUpdate = (cart) => {
-  if (cart == null) return 
+  if (cart == null) return
 
   let cartItems = []
   for (i = 0; i < cart.items.length; i++) {
@@ -97,10 +115,10 @@ const getProductName = (product, options) => {
     for (let [key, value] of Object.entries(options)) {
       opts.push(key + ": " + value)
     }
-    
+
     productName = productName + ' (' + opts.join(', ') + ')'
   }
-  
+
   return productName
 }
 
@@ -124,6 +142,7 @@ const updateVisitorInfoFromOrder = (order) => {
 // https://developers.ecwid.com/api-documentation/subscribe-to-events
 const init = () => {
   createMarkeazePixel()
+  createXhrObserver()
 
   Ecwid.OnAPILoaded.add(() => {
     loadExternalScript(Ecwid.getOwnerId(), initMarkeazePixel)
@@ -133,25 +152,41 @@ const init = () => {
     setVisitorInfo(profile)
   })
 
-  Ecwid.OnPageLoaded.add((page) => {
-    // When search mode detected - track only `search` event,
-    // without `page_view` events.
-    if (page.type == 'SEARCH') {
-      // Avoid search tracking on seach results navigation
-      if (page.offset == 0) {
-        trackSearch(page)
-      }
-    } else {
-      trackPageView(page)
-    }
-  })
-
   Ecwid.OnCartChanged.add((cart) => {
     trackCartUpdate(cart)
   })
 
   Ecwid.OnOrderPlaced.add((order) => {
     updateVisitorInfoFromOrder(order)
+  })
+
+  let searchResults = null
+
+  document.addEventListener('ajaxComplete', (event) => {
+    if (!event.detail) return
+    const xhr = event.detail.xhr
+    const data = event.detail.data
+    const text = xhr.responseText
+    if (!xhr || !data || !text) return
+    if (data.indexOf('searchProducts') === -1 || xhr.responseURL.indexOf('/rpc?') === -1) return
+    const res = text.match(/\/\/OK\[([0-9]*)/)
+    if (!res) return
+    const count = parseInt(res[1])
+    searchResults = count > 0 ? (count === 1 ? 'normal' : 'too_many') : 'empty'
+  })
+
+  Ecwid.OnPageLoaded.add((page) => {
+    // When search mode detected - track only `search` event,
+    // without `page_view` events.
+    if (page.type == 'SEARCH') {
+      // Avoid search tracking on seach results navigation
+      if (page.offset == 0) {
+        page.searchResults = searchResults
+        trackSearch(page)
+      }
+    } else {
+      trackPageView(page)
+    }
   })
 }
 
