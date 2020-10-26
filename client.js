@@ -66,10 +66,11 @@ const trackPageView = (page) => {
 }
 
 const trackSearch = (page) => {
-  const count = document.querySelectorAll('.grid-product').length
+  const productCount = document.querySelectorAll('.grid-product').length
+  const pagingCount = document.querySelectorAll('.pager__number').length
   mkz('trackSearch', {
     term: page.keywords,
-    result: count > 0 ? (count === 1 ? 'normal' : 'too_many') : 'empty'
+    result: productCount > 0 ? (pagingCount === 0 ? 'normal' : 'too_many') : 'empty'
   })
 }
 
@@ -138,15 +139,12 @@ const init = () => {
   })
 
   Ecwid.OnPageLoaded.add((page) => {
-    // When search mode detected - track only `search` event,
-    // without `page_view` events.
+    trackPageView(page)
     if (page.type == 'SEARCH') {
       // Avoid search tracking on seach results navigation
       if (page.offset == 0) {
         trackSearch(page)
       }
-    } else {
-      trackPageView(page)
     }
   })
 
